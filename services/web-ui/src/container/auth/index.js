@@ -14,7 +14,7 @@ import Grid from '@material-ui/core/Grid';
 
 // Components
 import Loader from '../../component/loader';
-import Logo from './oih-vertikal-zentriert-white.svg';
+import Logo from './logo.png';
 // Actions
 import { login } from '../../action/auth';
 
@@ -88,7 +88,7 @@ class Auth extends React.Component {
           <div style={{
               height: '95%',
               backgroundSize: 'cover',
-              backgroundImage: 'url(https://www.openintegrationhub.org/wp-content/uploads/2018/06/headergrafik-1440-x-684-px.jpg)',
+              backgroundImage: 'url(https://github.com/Kendralabs/Kendraflow-WebUI/blob/master/services/web-ui/src/container/auth/fintricity-background%20(1).jpeg?raw=true)',
           }}>
               <Grid
                   container
