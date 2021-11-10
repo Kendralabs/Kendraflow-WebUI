@@ -45,12 +45,12 @@ The setup script will attempt to provision the minikube instance with these valu
 | ![Windows](https://img.shields.io/badge/Windows-blue.svg) ![Mac-Intel](https://img.shields.io/badge/Mac--Intel-green.svg) <br> The OIH Framework requires the _ingress_ addon for kubernetes. This is not supported via Docker Bridge for Mac and Windows. Therefore, on these Operating Systems, minikube must be started with the flag `--vm=true`. This is handled in the setup script. More information can be found on the [minikube Github page](https://github.com/kubernetes/minikube/issues/7332). |
 | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
-| ![Mac-ARM](https://img.shields.io/badge/Mac--ARM-yellowgreen.svg) <br> Many of the components needed to run the local environment have not reached production status for Apple Silicon-based Macs. If you would like to run the framework locally on an M1-based Mac, some software must be installed in beta or pre-release status: <ul><li>Docker for Desktop is currently available as a [Release Candidate](https://docs.docker.com/docker-for-mac/apple-m1/). Minikube has launched Apple Silicon support, although with only the Docker VM driver provided in Docker for Desktop.</li><li>A newer version of the [_nginx-ingress-controller_](https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac) which runs on Docker can now be installed manually via `kubectl`. This is handled in the setup script.</li> |
+| ![Mac-ARM](https://img.shields.io/badge/Mac--ARM-yellowgreen.svg) <br> Some networking features available on Intel based systems are not available on newer Macs running Apple Silicon chips. Therefore, the system must be accessed using the `minikube tunnel` from a localhost address. The "example.com" service addresses are then mapped to localhost.|
 | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
 # Configuration
 
-Before running the setup script, the location of your NFS server must be updated in ./1-Platform/2.1-sourceCodeVolume.yaml. The server host is the IP address which minikube uses to access the host. In order to verify your server address, you will need to start minikube and then execute the following command: `minikube ssh grep host.minikube.internal /etc/hosts | cut -f1`
+Before running the setup script, the location of your host files must be updated in ./1.1-CodeVolume/sourceCodeVolume.yaml and the HOST_OIH_DIRECTORY in setup.sh. The server host is the IP address which minikube uses to access the host. In order to verify your server address, you will need to start minikube and then execute the following command: `minikube ssh grep host.minikube.internal /etc/hosts | cut -f1`. The server value as provided ('host.docker.internal') will work in most cases.
 
 The path is the path to the root of your cloned repository / base path of the framework
 
@@ -68,7 +68,7 @@ From the $OIH_ROOT/dev-tools/minikube folder, call the setup script
 bash ./setup.sh
 ```
 
-The script will check for prerequisites, and attempt to build all services. The script automates the steps found in the minikube [Local Installation Guide](../../minikube/README.md#installation).
+The script will check for prerequisites, and attempt to build all services.
 
 Additionally, the following options may be sent in the arguments to `setup.sh`.
 

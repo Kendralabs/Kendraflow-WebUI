@@ -6,6 +6,8 @@ set -e
 
 DEV_CONTAINER_IMAGE="openintegrationhub/dev-connector:latest"
 
+HOST_OIH_DIRECTORY="/Users/james/OIH/openintegrationhub"
+
 TENANT_1_NAME="Tenant 1"
 TENANT_1_ADMIN="ta1@example.com"
 TENANT_1_ADMIN_PASSWORD="1234"
@@ -63,7 +65,7 @@ clear_minikube="false"
 
 # script cache and settings
 os=""
-cluster_ip=""
+cluster_ip="" 
 admin_token=""
 
 tenant_1_id=""
@@ -370,6 +372,15 @@ function deployServices {
         then
             kubectl apply -f "$dir/service.yaml"
         fi
+    done
+}
+
+function sourceInstall {
+    rootdir="$(dirname $(dirname $(pwd)))" 
+    for service in "${from_source[@]}"
+    do
+        colorEcho 34 "Installing deps for $service"
+        npm install --prefix $rootdir -w "services/$service" 
     done
 }
 
@@ -835,7 +846,7 @@ clearMinikube
 
 if [ "$os" == "Darwin" ]; then
     if [ "$machine" == "ARM" ]; then
-        minikube start --driver=docker --memory $MK_MEMORY --cpus $MK_CPUS
+        minikube start --driver=docker --memory $MK_MEMORY --cpus $MK_CPUS --mount=true --mount-string="${HOST_OIH_DIRECTORY}:/openintegrationhub"
     else 
         minikube start --driver=hyperkit --vm=true --memory $MK_MEMORY --cpus $MK_CPUS
     fi
@@ -859,11 +870,11 @@ fi
 #minikube addons enable ingress
 minikube addons enable dashboard
 minikube addons enable metrics-server
-if [ "$os" == "Darwin" ] && [ "$machine" == "ARM" ]; then
-    kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.45.0/deploy/static/provider/cloud/deploy.yaml
-else
+#if [ "$os" == "Darwin" ] && [ "$machine" == "ARM" ]; then
+#    kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.44.0/deploy/static/provider/cloud/deploy.yaml
+#else
     minikube addons enable ingress
-fi
+#fi
 
 # remove oih resources
 kubectl -n oih-dev-ns delete pods,services,deployments --all
@@ -891,10 +902,19 @@ fi
 ###
 
 kubectl apply -f ./1-Platform
+if [ "$os" == "Darwin" ] && [ "$machine" == "ARM" ]; then
+    kubectl apply -f ./1.1-CodeVolume/sourceCodeVolumeARM.yaml
+else
+    kubectl apply -f ./1.1-CodeVolume/sourceCodeVolume.yaml
+fi
+kubectl apply -f ./1.2-CodeClaim
 
 waitForPodStatus mongodb.*1/1
 waitForPodStatus rabbitmq.*1/1
 waitForPodStatus redis.*1/1
+
+###run npm install on any local code services
+sourceInstall
 
 ###
 ### 5. deploy IAM
